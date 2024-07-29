@@ -1,0 +1,243 @@
+import java.util.*;
+
+public class Online_Examination {
+    private Map<String, User> users = new HashMap<>();
+    private User currentUser;
+    private Scanner scanner = new Scanner(System.in);
+    private boolean examStarted = false;
+
+    public static void main(String[] args) {
+        Online_Examination system = new Online_Examination();
+        system.initializeUsers();
+        system.mainMenu();
+    }
+
+    private void initializeUsers() {
+        users.put("user1", new User("user1", "password1", "User One"));
+        users.put("user2", new User("user2", "password2", "User Two"));
+    }
+
+    private void mainMenu() {
+        while (true) {
+            System.out.println("\nOnline Examination System:");
+            System.out.println("1. Login");
+            System.out.println("2. Register");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    login();
+                    break;
+                case 2:
+                    register();
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private void login() {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        User user = users.get(username);
+        if (user != null && user.getPassword().equals(password)) {
+            currentUser = user;
+            System.out.println("Login successful. Welcome, " + currentUser.getName() + "!");
+            userMenu();
+        } else {
+            System.out.println("Invalid username or password.");
+        }
+    }
+
+    private void register() {
+        System.out.print("Enter new username: ");
+        String username = scanner.nextLine();
+        if (users.containsKey(username)) {
+            System.out.println("Username already taken. Please choose a different username.");
+            return;
+        }
+        System.out.print("Enter new password: ");
+        String password = scanner.nextLine();
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+
+        User newUser = new User(username, password, name);
+        users.put(username, newUser);
+        System.out.println("Registration successful. You can now login.");
+    }
+
+    private void userMenu() {
+        while (true) {
+            System.out.println("\nUser Menu:");
+            System.out.println("1. Update Profile and Password");
+            System.out.println("2. Start Exam");
+            System.out.println("3. Logout");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    updateProfileAndPassword();
+                    break;
+                case 2:
+                    startExam();
+                    break;
+                case 3:
+                    logout();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private void updateProfileAndPassword() {
+        System.out.print("Enter new name: ");
+        String newName = scanner.nextLine();
+        System.out.print("Enter new password: ");
+        String newPassword = scanner.nextLine();
+
+        currentUser.setName(newName);
+        currentUser.setPassword(newPassword);
+        System.out.println("Profile updated successfully.");
+    }
+
+    private void startExam() {
+        if (examStarted) {
+            System.out.println("Exam is already in progress.");
+            return;
+        }
+
+        examStarted = true;
+        List<Question> questions = generateQuestions();
+        Map<Integer, String> answers = new HashMap<>();
+
+        for (int i = 0; i < questions.size(); i++) {
+            Question question = questions.get(i);
+            System.out.println((i + 1) + ". " + question.getQuestion());
+            System.out.println("a. " + question.getOptionA());
+            System.out.println("b. " + question.getOptionB());
+            System.out.println("c. " + question.getOptionC());
+            System.out.println("d. " + question.getOptionD());
+            System.out.print("Your answer: ");
+            String answer = scanner.nextLine();
+            answers.put(i + 1, answer);
+        }
+
+        submitExam(questions, answers);
+    }
+
+    private void submitExam(List<Question> questions, Map<Integer, String> answers) {
+        System.out.println("\nExam submitted.");
+        int correctAnswers = 0;
+        for (int i = 0; i < questions.size(); i++) {
+            Question question = questions.get(i);
+            String correctAnswer = question.getCorrectAnswer();
+            String userAnswer = answers.get(i + 1);
+
+            if (correctAnswer.equalsIgnoreCase(userAnswer)) {
+                correctAnswers++;
+            }
+        }
+        System.out.println("You got " + correctAnswers + " out of " + questions.size() + " correct.");
+        examStarted = false;
+    }
+
+    private List<Question> generateQuestions() {
+        List<Question> questions = new ArrayList<>();
+        questions.add(new Question("What is 2 + 2?", "1", "2", "3", "4", "d"));
+        questions.add(new Question("What is the capital of France?", "Berlin", "Madrid", "Paris", "Rome", "c"));
+        questions.add(new Question("Which is the largest ocean?", "Atlantic", "Indian", "Arctic", "Pacific", "d"));
+        return questions;
+    }
+
+    private void logout() {
+        System.out.println("Logging out...");
+        currentUser = null;
+    }
+}
+
+class User {
+    private String username;
+    private String password;
+    private String name;
+
+    public User(String username, String password, String name) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+
+class Question {
+    private String question;
+    private String optionA;
+    private String optionB;
+    private String optionC;
+    private String optionD;
+    private String correctAnswer;
+
+    public Question(String question, String optionA, String optionB, String optionC, String optionD, String correctAnswer) {
+        this.question = question;
+        this.optionA = optionA;
+        this.optionB = optionB;
+        this.optionC = optionC;
+        this.optionD = optionD;
+        this.correctAnswer = correctAnswer;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public String getOptionA() {
+        return optionA;
+    }
+
+    public String getOptionB() {
+        return optionB;
+    }
+
+    public String getOptionC() {
+        return optionC;
+    }
+
+    public String getOptionD() {
+        return optionD;
+    }
+
+    public String getCorrectAnswer() {
+        return correctAnswer;
+    }
+}
